@@ -1,6 +1,3 @@
-javascript
-Copiar
-Editar
 import { createEvent } from '../events.js';
 import { navigateTo } from '../router.js';
 

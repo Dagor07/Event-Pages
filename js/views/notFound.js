@@ -1,6 +1,3 @@
-javascript
-Copiar
-Editar
 import { isAuthenticated } from '../auth.js';
 import { navigateTo } from '../router.js';
 
