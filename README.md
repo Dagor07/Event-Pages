@@ -57,3 +57,5 @@
 Node.js and json-server installed
 
 
+### Errores
+No me muestra nada ![alt text](image.png)
