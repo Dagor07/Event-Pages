@@ -10,10 +10,13 @@ import { renderNotFound } from './views/notFound.js';
 const routes = {
   '/login': renderLogin,
   '/register': renderRegister,
-  '/dashboard': () => {
+  '/dashboard': (container) => {
     const user = getCurrentUser();
-    if (user.role === 'admin') return renderDashboardAdmin();
-    else return renderDashboardVisitor();
+    if (user?.role === 'admin') {
+      return renderDashboardAdmin(container);
+    } else {
+      return renderDashboardVisitor(container);
+    }
   },
   '/dashboard/events/create': renderCreateEvent,
   '/dashboard/enrollments': renderEnrollments,
@@ -22,25 +25,35 @@ const routes = {
 export function router() {
   const path = window.location.pathname;
   const app = document.getElementById('app');
+  const publicRoutes = ['/login', '/register', '/not-found'];
 
+  // Redirigir desde / o index.html a /login
+  if (path === '/' || path.includes('index.html')) {
+    return navigateTo('/login');
+  }
+
+  // Si está autenticado y visita login o register, redirigir al dashboard
   if (isAuthenticated() && (path === '/login' || path === '/register')) {
     return navigateTo('/dashboard');
   }
 
-  const publicRoutes = ['/login', '/register'];
+  // Si no está autenticado y accede a ruta privada
   if (!isAuthenticated() && !publicRoutes.includes(path)) {
     return navigateTo('/not-found');
   }
 
-  const view = routes[path] || renderNotFound;
   app.innerHTML = '';
-  view(app);
+
+  if (routes[path]) {
+    routes[path](app); // ✅ Pasamos el contenedor correctamente
+  } else {
+    renderNotFound(app);
+  }
 }
 
 export function navigateTo(path) {
-  window.history.pushState({}, path, window.location.origin + path);
+  window.history.pushState({}, '', window.location.origin + path);
   router();
 }
 
 window.addEventListener('popstate', router);
-
