@@ -1,51 +1,68 @@
-import { register } from '../auth.js';
+import { createEvent } from '../events.js';
 import { navigateTo } from '../router.js';
 
-export function renderRegister(container) {
+export function renderCreateEvent(container) {
   container.innerHTML = `
-    <div class="d-flex justify-content-center align-items-center vh-100">
-      <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
-        <h2 class="text-center mb-4">Registro</h2>
-        <form id="register-form">
+    <div class="container py-5">
+      <div class="card mx-auto shadow p-4" style="max-width: 600px;">
+        <h2 class="mb-4 text-center">Crear Evento</h2>
+        <form id="create-event-form">
           <div class="mb-3">
-            <label for="username" class="form-label">Usuario</label>
-            <input type="text" id="username" class="form-control" placeholder="Ingresa tu usuario" required />
+            <label for="name" class="form-label">Nombre del evento</label>
+            <input type="text" id="name" class="form-control" placeholder="Nombre del evento" required />
           </div>
           <div class="mb-3">
-            <label for="password" class="form-label">Contraseña</label>
-            <input type="password" id="password" class="form-control" placeholder="Ingresa tu contraseña" required />
+            <label for="description" class="form-label">Descripción</label>
+            <textarea id="description" class="form-control" placeholder="Descripción" required></textarea>
           </div>
-          <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+          <div class="mb-3">
+            <label for="date" class="form-label">Fecha</label>
+            <input type="date" id="date" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label for="capacity" class="form-label">Capacidad</label>
+            <input type="number" id="capacity" class="form-control" placeholder="Capacidad" required />
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Crear</button>
+            <button type="button" id="back" class="btn btn-secondary">Volver</button>
+          </div>
         </form>
-        <p class="text-center mt-3">¿Ya tienes cuenta? <a href="/login" id="go-login">Iniciar sesión</a></p>
-        <div id="register-error" class="alert alert-danger mt-3 d-none" role="alert"></div>
+        <div id="event-alert" class="alert alert-danger mt-3 d-none" role="alert"></div>
       </div>
     </div>
   `;
 
-  document.getElementById('go-login').addEventListener('click', (e) => {
-    e.preventDefault();
-    navigateTo('/login');
+  document.getElementById('back').addEventListener('click', () => {
+    navigateTo('/dashboard');
   });
 
-  document.getElementById('register-form').addEventListener('submit', async (e) => {
+  document.getElementById('create-event-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const errorBox = document.getElementById('register-error');
 
-    if (!username || !password) {
-      errorBox.textContent = 'Todos los campos son obligatorios.';
-      errorBox.classList.remove('d-none');
-      return;
-    }
+    const newEvent = {
+      name: document.getElementById('name').value.trim(),
+      description: document.getElementById('description').value.trim(),
+      date: document.getElementById('date').value,
+      capacity: parseInt(document.getElementById('capacity').value),
+      enrolled: 0
+    };
+
+    const alertBox = document.getElementById('event-alert');
 
     try {
-      await register(username, password);
+      if (!newEvent.name || !newEvent.description || !newEvent.date || isNaN(newEvent.capacity)) {
+        alertBox.textContent = 'Todos los campos son obligatorios y válidos.';
+        alertBox.classList.remove('d-none');
+        return;
+      }
+
+      await createEvent(newEvent);
+      alert('Evento creado con éxito');
       navigateTo('/dashboard');
     } catch (err) {
-      errorBox.textContent = err.message;
-      errorBox.classList.remove('d-none');
+      alertBox.textContent = 'Error al crear el evento';
+      alertBox.classList.remove('d-none');
     }
   });
 }
